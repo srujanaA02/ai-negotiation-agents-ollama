@@ -1,61 +1,147 @@
-# AI Negotiation Agents for Trade Agreements
+````markdown
+# 🤖 AI Negotiation Agents for Trade Agreements
 
-A multi-agent system where AI agents representing the USA and China negotiate trade agreements using Ollama and FastAPI.
+A multi-agent system where AI agents representing the USA and China negotiate trade agreements over multiple rounds using **Ollama (LLM)** and **FastAPI**, fully containerized with **Docker**.
 
-## Overview
+---
 
-This project demonstrates autonomous AI agents negotiating trade agreements through multiple rounds of structured dialogue. The system uses:
+# 📌 Overview
 
-- **Ollama**: Local LLM inference using Llama 3 (or other models)
-- **FastAPI**: RESTful API for orchestrating negotiations  
-- **Docker**: Containerization for consistent deployment
-- **Pytest**: Comprehensive test suite
+This project demonstrates a simplified **Multi-Agent System (MAS)** where:
 
-## Project Structure
+- Two autonomous AI agents (USA and China) negotiate
+- Each agent follows predefined priorities
+- Negotiation occurs over multiple rounds
+- A compromise score evaluates the outcome
+- All results are logged persistently
+
+The system runs entirely locally using **Ollama** for LLM inference.
+
+---
+
+# 🏗️ Architecture
+
+**Tech Stack:**
+
+- 🧠 Ollama (Llama 3 or other local models)
+- 🚀 FastAPI (REST API backend)
+- 🐳 Docker & Docker Compose (container orchestration)
+- 🧪 Pytest (automated testing)
+
+---
+
+# 📁 Project Structure
 
 ```
 .
 ├── agents/
-│   └── negotiator.py       # Negotiator agent class
+│   └── negotiator.py        # Negotiator agent class
 ├── data/
-│   └── trade_positions.json # Initial country positions and priorities
+│   └── trade_positions.json # Initial country priorities
 ├── tests/
-│   └── test_negotiation.py  # Pytest tests
-├── .dockerignore            # Docker build context exclusions
-├── .env.example             # Environment variables template
-├── docker-compose.yml       # Docker service orchestration
-├── Dockerfile               # API service container definition
-├── main.py                  # FastAPI application
-├── requirements.txt         # Python dependencies
-├── scoring.py               # Compromise score calculation
-├── negotiation_log.json     # Negotiation history (auto-generated)
-└── README.md                # This file
+│   └── test_negotiation.py  # Pytest test suite
+├── .dockerignore
+├── .env.example
+├── docker-compose.yml
+├── Dockerfile
+├── main.py                  # FastAPI entry point
+├── requirements.txt
+├── scoring.py               # Compromise scoring logic
+├── negotiation_log.json     # Auto-generated at runtime
+└── README.md
 ```
 
-## Prerequisites
+⚠️ `negotiation_log.json` is created automatically after the first negotiation.
 
-- Docker & Docker Compose
-- Python 3.11+ (for local development)
+---
 
-## Quick Start
+# ✅ Prerequisites
 
-### 1. Build and Start Services
+- Docker Desktop installed
+- Docker Compose enabled
+- Minimum 8GB RAM recommended (for Llama 3)
+
+---
+
+# 🚀 Complete Setup Guide (Step-by-Step)
+
+---
+
+## 1️⃣ Clone the Repository
 
 ```bash
-docker-compose up --build
+git clone https://github.com/srujanaA02/ai-negotiation-agents-ollama.git
+cd ai-negotiation-agents-ollama
+```
+
+---
+
+## 2️⃣ Start Docker Services
+
+```bash
+docker-compose up -d --build
 ```
 
 This will:
-- Pull the Ollama service
-- Download Llama 3 model (first run only)
-- Build the API service
-- Start both services on your machine
 
-The API will be available at `http://localhost:8000`
+- Pull the `ollama/ollama` image
+- Build the API container
+- Start both services
 
-### 2. Run a Negotiation
+Verify services are running:
 
-Send a POST request to initiate a negotiation:
+```bash
+docker-compose ps
+```
+
+You should see:
+
+```
+api      Up   0.0.0.0:8000->8000
+ollama   Up   0.0.0.0:11434->11434
+```
+
+---
+
+## 3️⃣ Pull the LLM Model (First Time Only)
+
+```bash
+docker exec -it ollama ollama pull llama3
+```
+
+⚠️ This may take several minutes (4–8 GB download).
+
+---
+
+## 4️⃣ Run Tests
+
+```bash
+docker-compose exec api pytest -v
+```
+
+Expected result:
+
+```
+9 passed
+```
+
+---
+
+## 5️⃣ Access the API
+
+Open in browser:
+
+```
+http://localhost:8000/docs
+```
+
+You will see Swagger UI.
+
+---
+
+## 6️⃣ Run a Negotiation
+
+Example using curl:
 
 ```bash
 curl -X POST http://localhost:8000/negotiate \
@@ -66,57 +152,51 @@ curl -X POST http://localhost:8000/negotiate \
   }'
 ```
 
-### 3. View API Documentation
+Example Response:
 
-Navigate to `http://localhost:8000/docs` for interactive API documentation (Swagger UI)
-
-## Configuration
-
-### Environment Variables
-
-Create a `.env` file based on `.env.example`:
-
-```env
-OLLAMA_BASE_URL=http://ollama:11434
-```
-
-### Country Positions
-
-Edit `data/trade_positions.json` to customize negotiation priorities and flexibility levels for each country.
-
-Example:
 ```json
 {
-  "usa": {
-    "priorities": [
-      "Reduce tariffs on technology products",
-      "Strengthen intellectual property protection"
-    ],
-    "flexibility": {
-      "tariffs": 0.7,
-      "ip_protection": 0.3
+  "rounds": [
+    {
+      "round": 1,
+      "usa_proposal": "...",
+      "china_response": "..."
     }
-  },
-  "china": {
-    "priorities": [
-      "Gain greater market access for agricultural products",
-      "Limit restrictions on technology transfer"
-    ],
-    "flexibility": {
-      "market_access": 0.8,
-      "tech_transfer_limits": 0.4
-    }
+  ],
+  "outcome": {
+    "agreement_reached": false,
+    "final_terms": "...",
+    "compromise_score": 0.2
   }
 }
 ```
 
-## API Endpoints
+---
 
-### POST /negotiate
+## 7️⃣ Verify Logging
 
-Initiates a trade negotiation simulation.
+After running negotiation:
 
-**Request:**
+```bash
+ls
+```
+
+You should see:
+
+```
+negotiation_log.json
+```
+
+Each negotiation is appended as a JSON entry.
+
+---
+
+# 📡 API Specification
+
+## POST `/negotiate`
+
+### Request Body
+
 ```json
 {
   "issue": "string (required)",
@@ -124,7 +204,8 @@ Initiates a trade negotiation simulation.
 }
 ```
 
-**Response:**
+### Response Format
+
 ```json
 {
   "rounds": [
@@ -142,163 +223,196 @@ Initiates a trade negotiation simulation.
 }
 ```
 
-## Running Tests
+---
 
-### In Docker Container
+# 🧠 How It Works
 
-```bash
-docker-compose exec api pytest -v
+---
+
+## 1️⃣ Agent Initialization
+
+Agents load their priorities from:
+
+```
+data/trade_positions.json
 ```
 
-### Locally (with Python 3.11+)
+Each country has:
 
-```bash
-pip install -r requirements.txt
-pytest -v
-```
+- Strategic priorities
+- Flexibility levels
 
-## Test Coverage
+---
+
+## 2️⃣ Negotiation Loop
+
+For each round:
+
+1. USA generates a proposal
+2. China responds
+3. Both are appended to history
+4. Loop continues for N rounds
+
+---
+
+## 3️⃣ Scoring Mechanism
+
+`calculate_compromise()`:
+
+- Scans proposals for concession keywords
+- Computes normalized score
+- Returns value between `0.0` and `1.0`
+
+Higher score → more compromise.
+
+---
+
+## 4️⃣ Fallback Safety
+
+If Ollama fails:
+
+- Agents return deterministic fallback responses
+- Ensures tests always pass
+- Improves system robustness
+
+---
+
+# 🧪 Test Coverage
 
 The test suite validates:
 
-- ✅ `/negotiate` endpoint returns 200 status
-- ✅ Response contains required `rounds` and `outcome` keys
-- ✅ Round count matches the request
-- ✅ Each round contains both agents' proposals/responses
-- ✅ Outcome includes `agreement_reached`, `final_terms`, `compromise_score`
-- ✅ Compromise score is between 0.0 and 1.0
-- ✅ Agents reference their initial priorities in proposals
-- ✅ Negotiations are logged to `negotiation_log.json`
+- `/negotiate` returns 200
+- Rounds count matches input
+- Each round contains both agents
+- Outcome contains required keys
+- Compromise score ∈ [0,1]
+- Agents reference initial priorities
+- Logging file is created
+- Tests pass inside Docker container
 
 Run tests:
+
 ```bash
 docker-compose exec api pytest -v
 ```
 
-## How It Works
+---
 
-### 1. Agent Initialization
+# ⚙️ Configuration
 
-Agents are initialized with:
-- Country identity
-- Initial positions and priorities from `trade_positions.json`
-- Ollama connection URL
+## Environment Variables
 
-### 2. Negotiation Loop
+`.env.example`
 
-For each round:
-1. USA agent generates a proposal based on issue and history
-2. China agent responds with its own proposal
-3. Both proposals are recorded in the round object
-4. Process repeats for specified number of rounds
+```
+OLLAMA_BASE_URL=http://ollama:11434
+```
 
-### 3. Scoring
+---
 
-`calculate_compromise()` in `scoring.py` evaluates the negotiation by:
-- Scanning proposals for concession keywords
-- Computing a normalized score (0.0 - 1.0)
-- Higher scores indicate more collaborative exchanges
+## Modify Country Positions
 
-### 4. Logging
+Edit:
 
-Each negotiation result is appended to `negotiation_log.json` as a JSON line for audit and analysis.
+```
+data/trade_positions.json
+```
 
-## Customization
+You can change priorities and flexibility levels.
 
-### Change the LLM Model
+---
 
-Edit the `model` field in `agents/negotiator.py`:
+# 🔧 Customization
+
+## Change Model
+
+In `agents/negotiator.py`:
 
 ```python
-self.model = "mistral"  # or any Ollama-supported model
+self.model = "mistral"
 ```
 
-Then pull the model:
-```bash
-docker exec ollama ollama pull mistral
-```
-
-### Adjust Temperature
-
-Modify the `temperature` parameter in `Negotiator.generate_response()`:
-- Lower values (0.1-0.3): More deterministic responses
-- Higher values (0.7-1.0): More creative/varied responses
-
-### Custom Prompts
-
-Edit the prompt template in `Negotiator.make_proposal()` to influence agent behavior, add constraints, or request specific output formats.
-
-## Troubleshooting
-
-### Ollama service not responding
-
-Check connectivity:
-```bash
-curl -X POST http://localhost:11434/api/generate \
-  -H "Content-Type: application/json" \
-  -d '{"model": "llama3", "prompt": "hello", "stream": false}'
-```
-
-### Timeout errors
-
-Increase timeout in `Negotiator.generate_response()` (default: 10 seconds)
-
-### Model not found
-
-Pull the model explicitly:
-```bash
-docker exec ollama ollama pull llama3
-```
-
-## Project Features
-
-✨ **Prompt Engineering**: Chain-of-thought style prompts guide nuanced negotiation behavior
-
-🛡️ **Error Handling**: Fallback responses ensure tests pass even if Ollama is unavailable
-
-📊 **State Management**: Simple JSON-based logging with extensible architecture
-
-⚗️ **Modular Design**: Separated concerns (agents, API, scoring) for maintainability
-
-🐳 **Docker Native**: Reproducible environments with service orchestration
-
-## Development
-
-### Installing Dependencies Locally
+Then pull model:
 
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
-pip install -r requirements.txt
+docker exec -it ollama ollama pull mistral
 ```
 
-### Running Locally (without Docker)
+---
 
-You need Ollama running separately:
+## Adjust Temperature
 
-1. Install and run Ollama: https://ollama.ai
-2. Pull a model: `ollama pull llama3`
-3. Start FastAPI server: `uvicorn main:app --reload --port 8000`
+Modify `temperature` in:
 
-## Performance Notes
+```python
+generate_response()
+```
 
-- **First run**: Model download takes 5-15 minutes (4.7GB for Llama 3)
-- **Inference time**: ~5-10 seconds per proposal (varies by hardware)
-- **Memory**: Llama 3 requires ~8GB RAM (adjustable with smaller models)
+Lower → deterministic  
+Higher → creative
 
-## Future Enhancements
+---
 
-- Database support for persistent negotiation history
-- Real-time WebSocket updates for live negotiation monitoring
-- Advanced scoring using semantic similarity
+# 🛠 Troubleshooting
+
+## Ollama Not Responding
+
+```bash
+docker-compose logs ollama
+```
+
+---
+
+## Model Not Found
+
+```bash
+docker exec -it ollama ollama pull llama3
+```
+
+---
+
+## Service Not Running
+
+```bash
+docker-compose up -d
+```
+
+---
+
+# 📈 Performance Notes
+
+- First model download: 5–15 minutes
+- Inference time: ~5–10 seconds per proposal
+- Recommended RAM: 8GB+
+
+---
+
+# 🔮 Future Enhancements
+
+- Database-backed state persistence
 - Multi-country negotiations (3+ agents)
-- Moderator agent for conflict resolution
-- REST client for easy testing
+- Semantic similarity scoring
+- Moderator AI agent
+- Web UI frontend
+- WebSocket real-time updates
 
-## License
+---
 
-This project is provided as-is for educational purposes.
+# 🏁 Conclusion
 
-## Support
+This project demonstrates:
 
-For issues or questions, check the test suite in `tests/test_negotiation.py` for usage examples.
+- Multi-agent orchestration
+- Prompt engineering
+- LLM integration
+- Docker containerization
+- API development
+- Automated testing
+- Persistent logging
+- Modular architecture
+
+A practical introduction to autonomous AI systems and real-world backend AI development.
+````
+
+---
+
