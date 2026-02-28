@@ -1,7 +1,7 @@
 import httpx
 import asyncio
 
-
+# Fallback response ensures deterministic behavior during testing
 class Negotiator:
     def __init__(self, country: str, positions: dict, ollama_url: str):
         self.country = country
