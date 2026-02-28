@@ -1,4 +1,3 @@
-````markdown
 # 🤖 AI Negotiation Agents for Trade Agreements
 
 A multi-agent system where AI agents representing the USA and China negotiate trade agreements over multiple rounds using **Ollama (LLM)** and **FastAPI**, fully containerized with **Docker**.
